@@ -1,0 +1,53 @@
+import boto3
+import tempfile
+import csv
+import os
+ec2 = boto3.client('ec2')
+s3_client = boto3.client('s3')
+def lambda_handler(event, context):
+    try:
+        instances = ec2.describe_instances()
+        csv_file = tempfile.NamedTemporaryFile(delete=False)
+        csv_filename = csv_file.name
+        fieldnames = ['Name', 'InstanceId', 'Environment', 'Scenario', 'patch']
+        
+        with open(csv_filename, mode='w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            for reservation in instances['Reservations']:
+                for instance in reservation['Instances']:
+                    instance_id = instance['InstanceId']
+                    Scenario_tag = ''
+                    name_tag = ''
+                    environment_tag = ''
+                    patch_tag = ''
+                    if 'Tags' in instance:
+                        for tag in instance['Tags']:
+                            if tag['Key'] == 'Name':
+                                name_tag = tag['Value']
+                            elif tag['Key'] == 'Environment':
+                                environment_tag = tag['Value']
+                            elif tag['Key'] == 'Scenario':
+                                Scenario_tag = tag['Value']
+                            elif tag['Key'] == 'patch':
+                                patch_tag = tag['Value']
+                    writer.writerow({
+                        'Name': name_tag,
+                        'InstanceId': instance_id,
+                        'Environment': environment_tag,
+                        'Scenario': Scenario_tag,
+                        'patch': patch_tag
+                    })
+        bucket_name = 'my-s3-bucket'
+        s3_key = 'all_ec2_tags.csv'
+        s3_client.upload_file(csv_filename, bucket_name, s3_key)
+        os.remove(csv_filename)
+        return {
+            'statusCode': 200,
+            'body': 'EC2 tags report uploaded to S3 bucket.'
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': f'Error: {str(e)}'
+        }
