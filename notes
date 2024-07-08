@@ -1,0 +1,1214 @@
+Kubernetes
+
+------------
+Kubectl install:
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+ 
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+ 
+echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+ 
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+ 
+chmod +x kubectl
+mkdir -p ~/.local/bin
+mv ./kubectl ~/.local/bin/kubectl
+
+sudo docker stop $(sudo docker ps -aq)
+https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
+
+helm install
+==================
+
+$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+$ chmod 700 get_helm.sh
+$ ./get_helm.sh
+$ helm version
+https://helm.sh/docs/intro/install/
+
+
+terraform install
+================
+https://developer.hashicorp.com/terraform/install
+
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+sudo yum -y install terraform
+
+tf-eks demo:
+-------------
+cd ~
+curl -LO https://matst1tr12345.s3.amazonaws.com/tfeks.zip
+unzip tfeks.zip
+cd tfeks
+vi main.tf
+(Enter AccessKey and Sec Acckey)
+terraform init
+terraform plan
+terraform apply
+
+ 140  aws eks update-kubeconfig --name tesco-cluster1
+  141  cat .kube/config
+    143  kubectl config current-context
+  144  kubectl cluster-info
+  145  kubectl get nodes
+
+aws eks update-kubeconfig --name tesco-cluster1
+sudo docker rmi -f $(sudo docker images -aq)
+
+5th July:
+------------------
+Demo 1: Interaction with pods
+  200  kubectl get nodes
+  201  kubectl get pods
+  202  kubectl run pod1 --image=public.ecr.aws/q5z6o6s6/staticrepo1:mysaticappimg
+  203  kubectl get pod
+  204  kubectl describe pod pod1
+  205  clear
+  206  kubectl get pod pod1
+  207  kubectl get pod pod1 -o yaml > pod1.yaml
+  208  cat pod1.yaml
+  209  kubectl delete pod pod1
+  210  kubectl get pods
+  211  kubectl run pod1 --image=public.ecr.aws/q5z6o6s6/staticrepo1:mysaticappimg
+  212  kubectl get pods
+  213  kubectl get pod -o wide
+  214  kubectl delete pod pod1
+
+demo2:
+----------
+ 228  kubectl get pod
+  229  kubectl get replicaset
+  230  kubectl get deployment
+  231  kubectl create deployment dep1 --image=public.ecr.aws/q5z6o6s6/staticrepo1:mysaticappimg --replicas=3
+  232  kubectl get pod
+  233  kubectl get replicaset
+  234  kubectl get deployment
+  235  kubectl get all
+  236  kubectl scale --current-replicas=3 --replicas=5 deployment.apps/dep1
+  237  kubectl get all
+  238  kubectl get pod -o wide
+  239  kubectl scale --current-replicas=5 --replicas=3 deployment.apps/dep1
+  240  kubectl get pod -o wide
+  241  kubectl delete deployment dep1
+  242  kubectl get all
+
+Demo3:
+------------
+245  kubectl get all
+  246  kubectl create deployment dep1 --image=public.ecr.aws/q5z6o6s6/staticrepo1:mysaticappimg --replicas=3
+  247  kubectl get all
+  248  kubectl expose deployment dep1 --type=Loadbalancer --port=80
+  249  kubectl expose deployment dep1 --type=LoadBalancer --port=80
+  250  kubectl get all
+  251  kubectl delete service dep1
+  252  kubectl get all
+  253  kubectl delete deployment dep1
+  254  kubectl get all
+
+On duplicate linux session:
+------------------------------------
+watch -x kubectl get all
+
+Demo4:
+-----------
+ 257  mkdir kdemos
+  258  cd kdemos
+  259  mkdir demo1
+  260  cd demo1
+  261  clear
+  262  kubectl create deployment dep1 --image=public.ecr.aws/q5z6o6s6/staticrepo1:mysaticappimg --replicas=3 --dry-run -o yaml > dep1.yaml
+  263  ls
+  264  cat dep1.yaml
+  265  kubectl apply -f dep1.yaml
+  266  vi dep1.yaml
+  267  kubectl apply -f dep1.yaml
+  268  vi dep1.yaml
+  269  kubectl apply -f dep1.yaml
+  270  ls
+  271  kubectl expose deployment dep1 --type=LoadBalancer --port=80 --dry-run -o yaml > service1.yaml
+  272  ls
+  273  cat service1.yaml
+  274  kubectl apply -f service1.yaml
+  275  kubectl delete -f service1.yaml
+  276  kubectl delete -f dep1.yaml
+  277  clear
+  278  touch app1.yaml
+  279  cat dep1.yaml
+  280  vi app1.yaml
+  281  cat service1.yaml
+  282  vi app1.yaml
+  283  clear
+  284  ls
+  285  kubectl apply -f app1.yaml
+  286  kubectl delete -f app1.yaml
+
+Demo5:
+----------
+304  kubectl get namespace
+  305  kubectl create namespace ns1
+  306  kubectl get namespace
+  307  ls
+  308  kubectl apply -f dep1.yaml --namespace ns1
+  309  kubectl delete -f dep1.yaml  --namespace ns1
+  310  kubectl apply -f dep1.yaml --namespace ns1
+  311  kubectl delete namespace ns1
+  312  kubectl create namespace ns1 --dry-run -o yaml > ns1.yaml
+  313  ls
+ 
+  315  cat ns1.yaml
+  316  history
+ 
+  318   kubectl create deployment dep1 --image=public.ecr.aws/q5z6o6s6/staticrepo1:mysaticappimg --replicas=3 --namespace ns1 --dry-run -o yaml > dep4.yaml
+  319  cat dep4.yaml
+  320  vi app2.yaml
+  321  cat ns1.yaml
+  322  vi app2.yaml
+
+  324  kubectl apply -f app2.yaml
+  325  kubectl delete -f app2.yaml
+
+Demo6:
+-------------
+kubectl create namespace ns1
+
+rq.yaml:
+------
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mem-quota-demo
+spec:
+  hard:
+    
+    requests.memory: 1Gi
+    
+    limits.memory: 2Gi
+	
+kubectl apply -f rq.yaml --namespace ns1
+	
+kubectl get ResourceQuota --namespace ns1
+
+kubectl describe ResourceQuota mem-quota-demo --namespace ns1
+
+pod1.yaml:
+-----------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: quota-mem-cpu-demo
+spec:
+  containers:
+  - name: quota-mem-cpu-demo-ctr
+    image: nginx
+    resources:
+      limits:
+        memory: "2Gi"
+        
+      requests:
+        memory: "1Gi"
+        
+
+ kubectl apply -f pod1.yaml --namespace ns1
+ kubectl describe ResourceQuota mem-quota-demo --namespace ns1
+ 
+ pod2.yaml:
+ ------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: quota-mem-cpu-demo-2
+spec:
+  containers:
+  - name: quota-mem-cpu-demo-2-ctr
+    image: redis
+    resources:
+      limits:
+        memory: "1Gi"
+        
+      requests:
+        memory: "700Mi"
+        
+
+
+kubectl apply -f pod2.yaml --namespace ns1
+
+ kubectl delete namespace ns1
+
+
+demo7:
+---------
+ 7  kubectl get nodes
+vi pod1.yaml
+-------------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod1
+spec:
+  containers:
+  - name: quota-mem-cpu-demo-ctr
+    image: nginx
+----------------------------
+    8  kubectl apply -f pod1.yaml
+    9  kubectl get pod -o wide
+ 14  kubectl describe node ip-10-0-1-106.ec2.internal
+   15  kubectl label node ip-10-0-1-106.ec2.internal "dept=trng"
+   16  kubectl describe node ip-10-0-1-106.ec2.internal
+vi p2.yaml
+---------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod1
+spec:
+  containers:
+  - name: quota-mem-cpu-demo-ctr
+    image: nginx
+  nodeSelector:
+    dept: trng
+---------------------
+27  kubectl apply -f p2.yaml
+   28  kubectl get pod -o wide
+   29  kubectl delete -f p2.yaml
+   30  kubectl label node ip-10-0-1-106.ec2.internal dept-
+
+31  kubectl apply -f p2.yaml
+   32  kubectl get pod -o wide
+   33  kubectl label node ip-10-0-1-106.ec2.internal dept=trng
+   34  kubectl get pod -o wide
+   35  kubectl delete -f p2.yaml
+   36  kubectl label node ip-10-0-1-106.ec2.internal dept-
+
+
+demo8:
+-----------
+40  vi p2.yaml
+(remove nodeSelector section)
+   41  kubectl apply -f p2.yaml
+   42  kubectl get pod
+   43  kubectl label pod pod1 "env=dev"
+   44  kubectl get pod --show-labels
+   45  kubectl label pod pod1 "env=qa"
+   46  kubectl label pod pod1 "env=qa"  --overwrite
+   47  kubectl get pod --show-labels
+
+
+Demo9:
+--------------
+kubectl run pod1 --image=public.ecr.aws/q5z6o6s6/staticrepo1:mysaticappimg
+kubectl get pod
+kubectl port-forward pod/pod1 7777:80
+
+==================================
+Demo 10
+==================================
+
+Linux Session3:
+---------------
+watch -x curl http://lb-hostname
+
+
+Linux Session2:
+----------------
+watch -x kubectl get pod,service,replicaset
+
+
+
+
+Linux Session1:
+------------------
+dep1.yaml:
+------------
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dep
+  namespace: default
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: hello-dep 
+
+  template:
+    metadata:
+      labels:
+        app: hello-dep
+    spec:
+      containers:
+      - image: gcr.io/google-samples/hello-app:1.0
+        imagePullPolicy: Always
+        name: hello-dep
+        ports:
+        - containerPort: 8080
+		
+kubectl apply -f dep1.yaml
+kubectl expose deployment hello-dep --type=LoadBalancer --port=80 --target-port=8080
+
+		
+Once you apply this or edit this, notice that there maybe a little downtime on your application because the old pods are getting terminated and the new ones are getting created.
+The fix is pretty easy actually. This happens because kubernetes doesn’t know when your new pod is ready to start accepting requests, so as soon as your new pod gets created, the old pod is terminated without waiting to see if all the necessary services, processes have started in the new pod which would then enable it to receive requests.
+
+To do this, Kubernetes provide a config option in deployment called Readiness Probe. Readiness Probe makes sure that the new pods created are ready to take on requests before terminating the old pods.
+
+
+
+dep2.yaml:
+---------
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dep
+  namespace: default
+spec:
+  replicas: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: hello-dep
+  template:
+    metadata:
+      labels:
+        app: hello-dep
+    spec:
+      containers:
+      - image: gcr.io/google-samples/hello-app:2.0
+        imagePullPolicy: Always
+        name: hello-dep
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+             path: /
+             port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+			 
+kubectl apply -f dep2.yaml
+
+
+
+kubectl rollout status deployment hello-dep
+
+kubectl rollout history deployment hello-dep
+
+kubectl rollout history deployment hello-dep --revision 2
+
+kubectl rollout undo deployments hello-dep
+
+kubectl rollout undo deployment hello-dep --to-revision 1
+
+kubectl rollout pause deployment hello-dep
+
+kubectl rollout resume deployment hello-dep
+
+
+DEmo 11
+==========================================
+
+------------------
+Demo11:
+-----------
+Blue/Green Deployment:
+---------------------
+
+Start with a new Deployment and service.
+Deploy new version deployment
+Issue a health check
+If health check passes, update load balancer and remove old deployment
+If health check fails, stop and send  alert
+
+blue.yaml:
+------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-1.10
+spec:
+  selector:
+    matchLabels:
+      app: nginx-1.10
+  
+
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        name: nginx
+        version: "1.10"
+        app: nginx-1.10
+    spec:
+      containers: 
+        - name: nginx
+          image: nginx:1.10
+          ports:
+            - name: http
+              containerPort: 80
+			  
+bservice.yaml:
+---------------
+apiVersion: v1
+kind: Service
+metadata: 
+  name: nginx
+  labels: 
+    name: nginx
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector: 
+    name: nginx
+    version: "1.10"
+  type: LoadBalancer
+  
+  
+
+  
+green.yaml:
+-----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-1.11
+spec:
+  selector:
+    matchLabels:
+      app: nginx-1.11
+  
+
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        name: nginx
+        version: "1.11"
+        app: nginx-1.11
+    spec:
+      containers: 
+        - name: nginx
+          image: nginx:1.11
+          ports:
+            - name: http
+              containerPort: 80
+			  
+To cut over to the "green" deployment we will update the selector for the service. Edit the service.yaml and change the selector version to "1.11" and apply. That will make it so that it matches the pods on the "green" deployment.
+
+
+
+
+Cloud and MS design patterns:
+-------------------------------------------
+https://learn.microsoft.com/en-us/azure/architecture/patterns/
+
+
+08-july-2024
+=================
+
+Demo1(Static Provisioning): 2gb volume will be used from all the worker nodes
+----------
+302  mkdir stdemo
+  303  cd stdemo
+  304  vi pv.yaml
+  305  kubectl get pv
+  306  kubectl get pvc
+  307  kubectl apply -f pv.yaml
+--------------
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+   name: pv0001
+   labels:
+      type: local
+spec:
+
+  capacity:
+      storage: 2Gi
+  accessModes:
+      - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: myclaim-1
+    namespace: default
+  hostPath:
+         path: "/tmp/data01"
+-----------------
+
+  308  kubectl get pvc
+  309  kubectl get pv
+  310  vi pvc.yaml
+---------------
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: myclaim-1
+spec:
+   accessModes:
+      - ReadWriteOnce
+   resources:
+      requests:
+         storage: 2Gi
+
+---------------
+  311  kubectl apply -f pvc.yaml
+  312  kubectl get pv
+  313  kubectl get pvc
+  314  vi pod.yaml
+  ---------------
+kind: Pod
+apiVersion: v1
+metadata:
+   name: mypod
+   labels:
+      name: frontendhttp
+spec:
+   containers:
+   - name: myfrontend
+     image: nginx
+     ports:
+      - containerPort: 80
+        name: "http-server"
+     volumeMounts:
+      - mountPath: "/usr/share/nginx/html"
+        name: vol1
+   volumes:
+      - name: vol1
+        persistentVolumeClaim:
+          claimName: myclaim-1
+
+----------------
+  317  kubectl apply -f pod.yaml
+  318  kubectl get pod
+  319  kubectl describe pod mypod
+  320  kubectl delete -f pod.yaml
+  321  kubectl delete -f pvc.yaml
+  322  kubectl delete -f pv.yaml
+
+Demo2(Dynamic Provisioning): ebs volume will be created and used 
+
+------------------
+kind: Pod
+apiVersion: v1
+metadata:
+   name: mypod
+   labels:
+      name: frontendhttp
+spec:
+   containers:
+   - name: myfrontend
+     image: nginx
+     ports:
+      - containerPort: 80
+        name: nginx
+     volumeMounts:
+      - mountPath: "/usr/share/nginx/html"
+        name: vol1
+   volumes:
+      - name: vol1
+        persistentVolumeClaim:
+          claimName: myclaim-1
+
+
+
+---------------
+  336  kubectl apply -f pod.yaml
+  
+  340  kubectl get pv,pvc
+  341  kubectl apply -f pod.yaml
+  342  kubectl get pod
+  343  kubectl get pv,pvc
+  344  kubectl get pod
+  345  kubectl delete -f pod.yaml
+  346  kubectl get pv,pvc
+  347  kubectl delete -f pvc.yaml
+  348  kubectl get pv,pvc
+
+
+Demo3:
+-----------
+
+https://github.com/kubernetes/examples/blob/master/staging/volumes/vsphere/simple-statefulset.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+spec:
+  serviceName: "nginx"
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: k8s.gcr.io/nginx-slim:0.8
+        ports:
+        - containerPort: 80
+          name: web
+
+------------
+Demo4: Daemon Set
+------------
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kplabs-daemonset
+spec:
+  selector:
+    matchLabels:
+      name: kplabs-all-pods
+  template:
+    metadata:
+      labels:
+        name: kplabs-all-pods
+    spec:
+      containers:
+      - name: kplabs-pods
+        image: nginx
+
+
+======
+Demo 5
+=====
+
+Demo5:
+-----------
+A ConfigMap stores configuration settings that your Kubernetes Pods consume.
+
+A ConfigMap is a dictionary of key-value pairs that store configuration settings for your applications.
+
+First, create a ConfigMap in your cluster .
+Second, consume to ConfigMap in your Pods and use its values.
+
+configmap.yaml:
+----------------
+kind: ConfigMap 
+apiVersion: v1 
+metadata:
+  name: example-configmap 
+data:
+  # Configuration values can be set as key-value properties
+  key1: mongodb
+  key2: mongodb://localhost:27017
+  
+  
+	
+kubectl apply -f configmap.yaml
+kubectl get configmap
+kubectl describe configmap example-configmap
+
+
+pod.yaml:
+---------
+
+apiVersion: v1 
+kind: Pod
+metadata:
+  name: pod-env-var 
+spec:
+  containers:
+    - name: testcon1
+      image: nginx:1.7.9 
+      env:
+        - name: env_var1
+          valueFrom:
+            configMapKeyRef:
+              name: example-configmap
+              key: key2
+      
+$>kubectl apply -f pod.yaml			
+$>kubectl exec -it pod-env-var -- /bin/sh
+
+#>env
+#exit
+
+
+-------------
+Demo6:
+----------======
+app.properties:
+---------------------
+k1=v1
+k2=v2
+k3=v3
+
+ kubectl create configmap app-config --from-file=app.properties
+
+
+pod.yaml:
+-----------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-pod
+spec:
+  containers:
+    - name: test-container
+      image: nginx
+      volumeMounts:
+      - name: vol1
+        mountPath: /etc/config
+  volumes:
+    - name: vol1
+      configMap:
+        name: app-config
+  restartPolicy: Never
+
+
+kubectl exec -it configmap-pod sh
+
+# cd /etc/config
+#ls
+#exit
+
+
+-------------
+Demo7:
+------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx-webapp
+  name: nginx-webapp
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx-webapp
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx-webapp
+    spec:
+      containers:
+      - image: busybox
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do echo echo $(date -u) 'Hi I am from Sidecar container 1' >> /var/log/index.html; sleep 5;done"]
+        name: sidecar-container1
+        resources: {}
+        volumeMounts:
+          - name: vol1
+            mountPath: /var/log
+      - image: busybox
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do echo echo $(date -u) 'Hi I am from Sidecar container 2' >> /var/log/index.html; sleep 5;done"]
+        name: sidecar-container2
+        resources: {}
+        volumeMounts:
+          - name: vol1
+            mountPath: /var/log
+      - image: nginx
+        name: main-container
+        resources: {}
+        ports:
+          - containerPort: 80
+        volumeMounts:
+          - name: vol1
+            mountPath: /usr/share/nginx/html
+      dnsPolicy: Default
+      volumes:
+      - name: vol1
+        emptyDir: {}
+status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-webapp
+  labels:
+    run: nginx-webapp
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    app: nginx-webapp
+  type: LoadBalancer
+
+
+Demo8:
+----------
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: node-app-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: node-app-job
+        image: alpine   
+        command: ["echo", "Welcome to my Node app"]
+      restartPolicy: Never
+	  
+kubectl get pod --watch to see events so that you can observe if there’s an error when creating the job.
+
+kubectl logs <pod-name>
+
+completions & parallelism:
+--------------------------
+completions: one after other
+
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: node-app-job
+spec:
+  completions: 2
+  template:
+    spec:
+      containers:
+      - name: node-app-job
+        image: alpine
+        command: ["echo", "Welcome to my Node app"]
+      restartPolicy: Never
+	  
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: node-app-job
+spec:
+  completions: 2
+  parallelism: 2
+  template:
+    spec:
+      containers:
+      - name: node-app-job
+        image: alpine
+        command: ["echo", "Welcome to my Node app"]
+      restartPolicy: Never
+	  
+backoffLimit & activeDeadlineSeconds:
+-------------------------------------
+If your job contains something(ex: command error) that doesn’t allow your job to create successfully, it tries creating pods continuously. When you run kubectl get pods you’ll see several pods with Error status. But using backoffLimit you can limit the number of pods creating continuously.
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: node-app-job
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      containers:
+      - name: node-app-job
+        image: alpine
+        command: ["ls", "/data"]
+      restartPolicy: Never
+
+
+activeDeadlineSeconds help us to decide how many seconds should the job runs. To verify this option we set sleep command inside our job to run it for 40 seconds. But using activeDeadlineSeconds: 15 we can terminate the job after 15 seconds.
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: node-app-job
+spec:
+  activeDeadlineSeconds: 15
+  template:
+    spec:
+      containers:
+      - name: node-app-job
+        image: alpine
+        command: ["sleep", "40"]
+      restartPolicy: Never
+
+
+Demo9:
+------------
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: node-app-job
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: node-app-job
+            image: alpine   
+            command: ["echo", "Welcome to my Node app"]
+          restartPolicy: Never
+
+-------------
+Demo11:
+--------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lab1
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: dept
+            operator: In
+            values:
+            - trng
+            
+  containers:
+  - name: con1
+    image: nginx
+
+
+Demo10:
+---------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lab1
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: dept
+            operator: In
+            values:
+            - trng
+  containers:
+  - name: with-node-affinity
+    image: nginx
+
+Demo11:
+--------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lab1
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: dept
+            operator: In
+            values:
+            - trng
+            
+  containers:
+  - name: con1
+    image: nginx
+
+
+-------------
+Demo12:
+----------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod1
+  labels:
+    app: frontend
+spec:
+  containers:
+  - name: con1
+    image: nginx
+--------------------------
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod3
+spec:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - frontend
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - name: con3
+    image: nginx
+
+
+Metrics Server deploy:
+------------------------------
+ 
+ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+ kubectl get deployment metrics-server -n kube-system
+
+Demo 13
+--------------
+nginx-deploy.yaml :
+ ----------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    type: dev
+  name: nginx-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: dev
+  template:
+    metadata:
+      labels:
+        type: dev
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            memory: 256Mi 
+          requests:
+            memory: 128Mi 
+			
+
+
+
+			
+hpa-memory.yaml:
+---------------------
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx-memory
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-deploy
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: AverageValue
+        averageValue: 10Mi
+
+
+kubectl get hpa
+
+
+kubectl exec -it podname -- /bin/bash
+
+
+Stress memory induce:
+-------------------------
+ cat <(yes | tr \\n x | head -c $((1024*1024*100))) <(sleep 420) | grep n
+
+
+Demo 14:
+=================
+
+nginx-deploy.yaml :
+ ----------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    type: dev
+  name: nginx-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: dev
+  template:
+    metadata:
+      labels:
+        type: dev
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+			
+
+
+hpa1.yaml:
+-------------
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx-deploy
+spec:
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-deploy 
+  targetCPUUtilizationPercentage: 10
+  
+  kubectl apply -f hpa1.yaml
+  
+  kubectl get hpa
+  
+  kubectl exec -it nginx-deploy-67b6f7f794-7cslv -- /bin/bash
+  
+  Induce stress in pod:
+  -------------------------
+  
+  dd if=/dev/zero of=/dev/null
+  
+  kubectl get hpa
+  
+  kubectl describe hpa nginx-deploy
