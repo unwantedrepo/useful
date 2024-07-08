@@ -1,3 +1,422 @@
+AWS CLI:
+---------------
+https://awscli.amazonaws.com/AWSCLIV2.msi
+
+Putty:
+--------
+https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.81-installer.msi
+
+VS Code:
+------------
+https://code.visualstudio.com/download
+
+
+aws ssm send-command --document-name "AWS-RunShellScript" --document-version "1" --targets '[{"Key":"InstanceIds","Values":[]}]' --parameters '{"workingDirectory":[""],"executionTimeout":["3600"],"commands":["echo \"ho bro\""]}' --timeout-seconds 600 --max-concurrency "50" --max-errors "0" --region us-east-1
+
+on linux:
+----------------
+sudo yum update
+
+ sudo yum install tree unzip
+
+
+AWS CLI Install:
+--------------------
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+aws --version
+
+sudo yum install gnupg*
+
+Converged Infra:
+----------------------
+https://www.vmware.com/topics/glossary/content/converged-infrastructure.html#:~:text=Converged%20infrastructure%20is%20a%20pre,components%20separately%20from%20different%20suppliers.
+
+12 factor apps:
+----------------------
+https://12factor.net/
+
+Docker in Windows:
+-----------------------------
+
+set-executionpolicy unrestricted
+
+Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/microsoft/Windows-Containers/Main/helpful_tools/Install-DockerCE/install-docker-ce.ps1" -o install-docker-ce.ps1
+
+.\install-docker-ce.ps1
+
+docker --version
+
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+Start-BitsTransfer -Source "https://github.com/docker/compose/releases/download/v2.28.1/docker-compose-windows-x86_64.exe" 
+ls
+
+cp .\docker-compose-windows-x86_64.exe 'C:\Windows\System32\docker-compose.exe'
+
+docker-compose version
+
+---------------------------------
+
+Linux Docker:
+-----------------
+sudo yum install -y yum-utils
+	
+sudo yum-config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+sudo yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo systemctl start docker
+
+sudo docker --version
+
+sudo docker compose version
+
+-------------------------------------------
+Demo1:
+---------
+39  sudo docker images
+   40  sudo docker ps -a
+   41  sudo docker pull httpd
+   42  sudo docker images
+   43  sudo docker ps -a
+   44  sudo docker run -d -p 7070:80 --name con1 httpd:latest
+   45  sudo docker ps -a
+Browse the page
+
+   46  sudo docker stop con1
+
+Browse the page
+   47  sudo docker start con1
+
+Browse the page
+   48  sudo docker run -d -p 7777:80 --name con2 httpd:latest
+   49  sudo docker ps -a
+ Browse the page
+   51  sudo docker rm -f con1
+   52  sudo docker rm -f con2
+   53  sudo docker ps -a
+   54  sudo docker images
+   55  sudo docker rmi httpd:latest
+   56  sudo docker images
+---------------------------------------------------
+
+sudo docker pull mcr.microsoft.com/windows/servercore/iis
+
+
+3rd July:
+---------------
+sudo systemctl start docker
+Demo1:
+------------
+90  sudo docker pull nginx
+   91  sudo docker run -d -p 7777:80 --name con1 nginx:latest
+   92  sudo docker ps -a
+   93  sudo docker exec -it con1 sh
+# pwd
+
+# cd /usr/share/nginx/html
+# ls
+
+# echo "<h1>Hello Nginx</h1>" > index.html
+# exit
+
+
+Demo2:
+---------
+ 106  sudo docker run -it --name con1 alpine:latest
+ 
+#ip a
+#env
+#exit
+
+  108  sudo docker rm -f con1
+
+
+Volume Demo:
+-------------------
+sudo su -
+docker volume list
+   
+    3  docker volume create vol1cat 
+    4  docker volume list
+    5  cd /var/lib/docker/volumes/
+    6  ls
+    7  tree vol1/
+    8  sudo docker run -d -p 7777:80 --name con1 -v vol1:/usr/local/apache2/htdocs/ httpd:latest
+    9  tree vol1/
+   10  cat vol1/_data/index.html
+   11  sudo docker exec -it con1 sh
+# cd htdocs
+# echo "<h1>Volume Example</h1>" > index.html
+# exit
+
+
+   12  cat vol1/_data/index.html
+   13  echo "<h1>Volume Example-- Modified outside</h1>" > vol1/_data/index.html
+   14  sudo docker exec -it con1 sh
+
+# pwd
+
+# cd htdocs
+# cat index.html
+
+# exit
+
+NW Demo1:
+---------------
+ 3  sudo docker network list
+    4  sudo docker inspect network bridge
+    5  sudo docker inspect network host
+   
+    7  sudo docker run -d -p 7777:80 --name con1 nginx
+    8  sudo docker inspect network host
+    9  sudo docker inspect network bridge
+   10  sudo docker rm -f con1
+   11  sudo docker inspect network bridge
+
+
+---------------
+NW Demo2:
+----------------
+ 2  sudo docker network list
+    3  sudo docker inspect network bridge
+    4  ifconfig
+    5  sudo yum install net-tools
+    6  ifconfig
+    7  sudo docker network create --driver bridge --subnet 10.0.0.0/16 mybridge
+    8  sudo docker network list
+    9  sudo docker inspect network mybridge
+   10  ifconfig
+   11  sudo docker run -d --name con1 busybox sh -c "while true;do sleep 3600;done"
+   12  sudo docker inspect network mybridge
+   13  sudo docker network connect mybridge con1
+   14  sudo docker inspect network mybridge
+   15  sudo docker run -d --name con2 busybox sh -c "while true;do sleep 3600;done"
+   16  sudo docker inspect network mybridge
+   17  sudo docker network connect mybridge con2
+   18  sudo docker inspect network mybridge
+   19  sudo docker exec -it con1 ip a
+   20  sudo docker exec -it con2 ip a
+   21  sudo docker exec -it con1 ping 10.0.0.3
+   22  sudo docker exec -it con2 ping 10.0.0.2
+   23  sudo docker exec -it con1 ping con2
+   24  sudo docker exec -it con2 ping con1
+   25  ifconfig
+   26  sudo docker exec -it con1 ping 172.17.0.1
+   27  sudo docker exec -it con2 ping 172.17.0.1
+   28  sudo docker rm -f con1
+   29  sudo docker rm -f con2
+   30  sudo docker network rm mybridge
+   31  sudo docker network list
+
+
+NW Demo3:
+-----------------
+ 1  ifconfig
+    2  sudo docker network list
+    3  sudo docker inspect network host
+    4  sudo docker run -d --name con1 --network host busybox sh -c "while true;do sleep 3600;done"
+    5  sudo docker inspect network host
+    6  sudo docker exec -it con1 ip a
+    7  sudo docker rm -f
+    8  sudo docker rm -f con1
+    9  sudo docker inspect network host
+   10  sudo docker run -d --name con1 --network host nginx
+   11  curl http://localhost
+   12  sudo docker rm -f con1
+
+PubDemo:
+----------------
+Create a pulic repo in hub.docker.com
+34  sudo docker login
+   35  sudo docker images
+   36  sudo docker tag mysaticappimg:latest papacrao/staticrepo1:mysaticappimg
+   37  sudo docker images
+   38  sudo docker push papacrao/statsupicrepo1:mysaticappimg
+   39  sudo docker rmi papacrao/staticrepo1:mysaticappimg
+   40  sudo docker images
+   41  sudo docker rmi mysaticappimg:latest
+   42  sudo docker images+-
+
+---------------
+ECR Demo:
+---------------
+Create public ECR repo.
+
+46  sudo docker images
+   47  sudo docker pull papacrao/staticrepo1:mysaticappimg
+   48  sudo docker images
+   49  sudo docker tag papacrao/staticrepo1:mysaticappimg public.ecr.aws/q5z6o6s6/staticrepo1:mysaticappimg
+   50  sudo docker images
+   51  aws ecr-public get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin public.ecr.aws/q5z6o6s6
+   52  sudo docker push public.ecr.aws/q5z6o6s6/staticrepo1:mysaticappimg
+
+
+
+Lab document
+=====================
+
+https://matst1tr12345.s3.amazonaws.com/docker.zip
+
+JDK:
+---------
+https://aka.ms/download-jdk/microsoft-jdk-11.0.23-windows-x64.msi
+
+Eclipse:
+------------
+https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2022-09/R/eclipse-jee-2022-09-R-win32-x86_64.zip
+https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2021-09/R/eclipse-jee-2021-09-R-win32-x86_64.zip
+
+Docker Labs:
+------------------
+https://matst1tr12345.s3.amazonaws.com/docker.zip
+
+4th July:
+------------
+Demo1:
+-----------
+FROM maven AS stage1
+COPY ./src /usr/src/app/src
+COPY pom.xml /usr/src/app
+RUN mvn -f /usr/src/app/pom.xml package
+
+FROM tomcat
+RUN rm -fr /usr/local/tomcat/webapps/ROOT
+COPY --from=stage1 /usr/src/app/target/demoapp1.war /usr/local/tomcat/webapps/ROOT.war
+
+composedemo1:
+---------------------
+173  mkdir demo2
+  174  cd demo2
+  175  vi docker-compose.yaml
+------------------------------
+version: '3.4'
+
+services:
+  frontend:
+    image: nginx
+    ports:
+      - 7070:80
+
+  backend:
+    image: httpd
+    ports:
+      - 7777:80
+---------------------------
+
+
+
+  176  sudo docker images
+  177  sudo docker ps -a
+  178  sudo docker compose up -d
+  
+  182  sudo docker compose ps -a
+  183  sudo docker ps -a
+  184  sudo docker compose down
+
+
+cdemo2:
+--------------
+version: '3.7'
+
+services:
+  webui:
+    image: staticwebui
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 7070:80
+
+cdemo3:
+----------
+version: '3.7'
+
+services:
+  webui:
+    image: nginx
+    ports:
+      - "7777-7779:80"
+    deploy:
+      replicas: 3
+
+------------
+cdemo4:
+------------
+version: '3.7'
+
+services:
+  service1:
+    image: nginx
+    ports:
+      - 7778:80
+    networks:
+      - testnw
+
+  service2:
+    image: nginx
+    ports:
+      - 7777:80
+    
+    networks:
+      - testnw
+
+
+networks:
+  testnw: 
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+          gateway: 10.0.0.1
+
+
+-----------
+cdemo5:
+---------------
+version: '3.4'
+
+services:
+  service1:
+    image: nginx
+    ports:
+      - 7777:80
+    volumes:
+      - vol1:/usr/share/nginx/html
+    
+   
+
+  service2:
+    image: nginx
+    ports:
+      - 7778:80
+    volumes:
+      - vol1:/usr/share/nginx/html
+
+volumes:
+  vol1:
+    driver: local
+
+------------
+cdemo6:
+------------
+version: "3.7"
+
+services:
+  app:
+    image: nginx
+    
+    ports:
+      - 7777:80
+    
+    
+    volumes:
+      - ./app:/usr/share/nginx/html
+
+
+==============================
 Kubernetes
 
 ------------
