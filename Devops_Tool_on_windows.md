@@ -54,6 +54,8 @@ Start-Process -FilePath $installerPath -ArgumentList "/silent" -Wait
 Remove-Item -Path $installerPath
 
 ```
+once, vscode is installed, install plugin for docker(Microsoft), kubernetes(Microsoft), terraform (hashicorp) and aws toolkit
+
 ## Docker:
 1. open server managar on windows server and click on **Add Roles and Features**, then click **Next** on consecutive 3 pages. On features tab, select **containers** to install it on server. After this feature instation, server needs to be restarted.
 2. Post restart of server, open powershell and run below commands to install docker.
