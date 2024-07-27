@@ -19,7 +19,28 @@ Download latest vscode installer from below link and manually install it on serv
 ```
 https://code.visualstudio.com/download
 ```
+or run below powershell script to install using powershell
 
+```
+# Set the security protocol to use TLS 1.2
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# Define URL for the Visual Studio Code installer
+$url = "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64"
+
+# Define path to save the installer
+$installerPath = "$env:TEMP\VSCodeSetup.exe"
+
+# Download the installer
+Invoke-WebRequest -Uri $url -OutFile $installerPath
+
+# Run the installer silently
+Start-Process -FilePath $installerPath -ArgumentList "/silent" -Wait
+
+# Clean up
+Remove-Item -Path $installerPath
+
+```
 ## Docker:
 1. open server managar on windows server and click on **Add Roles and Features**, then click **Next** on consecutive 3 pages. On features tab, select **containers** to install it on server. After this feature instation, server needs to be restarted.
 2. Post restart of server, open powershell and run below commands to install docker.
