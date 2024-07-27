@@ -19,6 +19,13 @@ Download latest putty installer from below link and manually install it on serve
 ```
 https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.81-installer.msi
 ```
+Run below powershell command to install putty
+```
+Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.81-installer.msi -OutFile putty-installer.msi
+Start-Process msiexec.exe -ArgumentList '/i putty-installer.msi /quiet' -NoNewWindow -Wait
+& "$env:ProgramFiles\PuTTY\putty.exe" -V
+
+```
 
 ## VS Code:
 Download latest vscode installer from below link and manually install it on server choosing all the default setup.
