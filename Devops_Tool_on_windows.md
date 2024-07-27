@@ -7,7 +7,13 @@ Download latest aws cli installer from below mentioned aws site and manually ins
 ```
 https://awscli.amazonaws.com/AWSCLIV2.msi
 ```
+Run below powershell command to install aws cli
 
+```
+Invoke-WebRequest -Uri https://awscli.amazonaws.com/AWSCLIV2.msi -OutFile AWSCLIV2.msi
+Start-Process msiexec.exe -ArgumentList '/i AWSCLIV2.msi /quiet' -NoNewWindow -Wait
+aws --version
+```
 ## Putty:
 Download latest putty installer from below link and manually install it on server choosing all the default setup.
 ```
