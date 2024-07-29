@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-app
+  labels:
+    app: test-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: test-app
+  template:
+    metadata:
+      labels:
+        app: test-app
+        vpc.amazonaws.com/PrivateIPv4Address: "true"  # Ensure this label is present on the pod template metadata
+    spec:
+      containers:
+      - name: windows-container
+        image: mcr.microsoft.com/windows/servercore/iis:windowsservercore-ltsc2019
+        ports:
+        - containerPort: 80
+      nodeSelector:
+        kubernetes.io/os: windows
+        kubernetes.io/arch: amd64
