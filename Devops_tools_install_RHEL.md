@@ -114,3 +114,20 @@ curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/d
 sudo mv /tmp/eksctl /usr/local/bin
 eksctl version
 ```
+
+## Metrics server in k8s cluster:
+
+The Metrics Server is available as a Kubernetes manifest from the official repository. You can apply it with the following command:
+```
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+Verify the Installation:
+```
+kubectl get pods -n kube-system
+```
+
+Verify Node and Pod Metrics
+```
+kubectl top nodes
+kubectl top pods
+```
