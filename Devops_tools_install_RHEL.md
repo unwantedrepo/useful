@@ -107,3 +107,10 @@ To complete the setup, Jenkins requires an unlock key. Retrieve the unlock key f
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 ```
 Copy the key from the terminal and paste it into the setup wizard. Install Suggested Plugins and Finish setup
+
+## EKSCTL:
+```
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+eksctl version
+```
