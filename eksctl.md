@@ -1,4 +1,5 @@
 https://eksctl.io/usage/windows-worker-nodes/#
+https://docs.aws.amazon.com/eks/latest/userguide/sample-deployment.html
 
 Creating a new Windows cluster¶
 The config file syntax allows creating a fully-functioning Windows cluster in a single command:
